@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>On-Hand Blanks Inventory — Pure Choice Apparel</title>
+<style>
+  :root{
+    --bg:#0f172a; --panel:#111827; --line:#1f2937; --line2:#374151;
+    --ink:#e5e7eb; --muted:#9ca3af; --accent:#38bdf8; --accent2:#22c55e;
+    --warn:#fde68a; --warnink:#78350f; --field:#0b1220;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font:14px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+  header{padding:18px 22px;border-bottom:1px solid var(--line);
+    display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:space-between}
+  h1{margin:0;font-size:17px;font-weight:650;letter-spacing:.2px}
+  h1 small{display:block;color:var(--muted);font-weight:400;font-size:12px;margin-top:3px}
+  .bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+  button{cursor:pointer;border:1px solid var(--line2);background:#1a2231;color:var(--ink);
+    padding:8px 13px;border-radius:8px;font-size:13px;font-weight:550;transition:.12s}
+  button:hover{border-color:var(--accent);color:#fff}
+  button.primary{background:var(--accent);border-color:var(--accent);color:#04222e}
+  button.primary:hover{background:#5cccf7}
+  button.good{background:var(--accent2);border-color:var(--accent2);color:#04240f}
+  button.ghost{background:transparent}
+  button.danger:hover{border-color:#ef4444;color:#fca5a5}
+  .wrap{padding:16px 22px 90px}
+  .status{color:var(--muted);font-size:12px;margin:0 0 12px}
+  .tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:10px}
+  table{border-collapse:collapse;width:100%;min-width:900px}
+  th,td{border-bottom:1px solid var(--line);padding:0;text-align:center;white-space:nowrap}
+  thead th{position:sticky;top:0;background:#0c1424;color:#cbd5e1;font-weight:600;
+    font-size:11px;letter-spacing:.4px;text-transform:uppercase;padding:9px 6px;z-index:2}
+  thead th.text{text-align:left;padding-left:12px}
+  td input{width:100%;border:0;background:transparent;color:var(--ink);
+    padding:9px 6px;font:inherit;text-align:center}
+  td.text input{text-align:left;padding-left:12px;min-width:150px}
+  td input:focus{outline:2px solid var(--accent);outline-offset:-2px;background:var(--field)}
+  td input::placeholder{color:#4b5563}
+  td.size input{width:56px}
+  tbody tr:hover td{background:#0c1526}
+  tr.section-row td{background:#0b2a3a;color:#7dd3fc;font-weight:700;letter-spacing:1.5px;
+    text-align:left;padding:9px 12px;font-size:12px;text-transform:uppercase;
+    border-top:2px solid #1f2937;border-bottom:2px solid #1f2937}
+  tr.section-row:hover td{background:#0b2a3a}
+  td.total{font-weight:700;color:var(--accent);padding:0 10px;min-width:60px}
+  td.del{width:34px}
+  .del button{border:0;background:transparent;color:#64748b;padding:6px 8px;font-size:15px}
+  .del button:hover{color:#fca5a5}
+  tfoot td{font-weight:700;background:#0c1424;padding:10px 6px;border-top:2px solid var(--line2)}
+  tfoot td.text{text-align:right;padding-right:12px;color:var(--muted);font-weight:600}
+  tfoot td.grand{color:var(--accent2);font-size:15px}
+  .addrow{margin-top:12px}
+  .hint{color:var(--muted);font-size:12px;margin-top:16px;max-width:760px}
+  .hint code{background:#0c1424;border:1px solid var(--line2);padding:1px 6px;border-radius:5px;color:#cbd5e1}
+  input[type=file]{display:none}
+  @media print{
+    body{background:#fff;color:#000}
+    header .bar,.addrow,.del,.hint,.status{display:none}
+    .tablewrap{border:0}
+    th,td{border-color:#ccc}
+    thead th{background:#eee;color:#000}
+    td.total,tfoot td.grand{color:#000}
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>On-Hand Blanks Inventory
+    <small>Pure Choice Apparel — what's physically on the shelf (nets against SanMar demand before ordering)</small>
+  </h1>
+  <div class="bar">
+    <button class="good" onclick="addRow()">+ Add row</button>
+    <button class="primary" onclick="exportCSV()">Export CSV</button>
+    <button onclick="document.getElementById('imp').click()">Import CSV</button>
+    <input type="file" id="imp" accept=".csv" onchange="importCSV(this)">
+    <button onclick="window.print()">Print</button>
+    <button class="ghost danger" onclick="clearAll()">Clear all</button>
+  </div>
+</header>
+
+<div class="wrap">
+  <p class="status" id="status">Autosaves to this browser. Last saved: —</p>
+  <div class="tablewrap">
+    <table id="grid">
+      <thead>
+        <tr id="head"></tr>
+      </thead>
+      <tbody id="body"></tbody>
+      <tfoot>
+        <tr id="foot"></tr>
+      </tfoot>
+    </table>
+  </div>
+  <p class="hint">
+    <b>Style</b> / <b>Color</b> should match your <code>sanmar_style</code> / <code>sanmar_color</code>
+    in <code>sku_map.csv</code> so the bot can subtract on-hand from demand. Export drops
+    <code>on_hand.csv</code> next to <code>blanks_bot.py</code>. Tab moves across a row; Enter (in the last cell) adds a new row.
+  </p>
+</div>
+
+<script>
+const SIZES = ["XS","S","M","L","XL","2XL","3XL","4XL","5XL","6XL"];
+const KEY = "pca_on_hand_v3";   // bumped: + CC1717 Black, District 6154 Crew, DT6600 Red/Grey hoodies
+const $ = s => document.querySelector(s);
+
+// ---- header ----
+(function head(){
+  const cols = ['<th class="text">SanMar Style</th>','<th class="text">SanMar Color</th>','<th class="text">Description</th>'];
+  SIZES.forEach(s => cols.push(`<th>${s}</th>`));
+  cols.push('<th>Total</th>','<th></th>');
+  $("#head").innerHTML = cols.join("");
+})();
+
+function blankRow(){ return {style:"",color:"",desc:"", sizes:Object.fromEntries(SIZES.map(s=>[s,""]))}; }
+
+// Seeded from the 6 shelf-count photos (2026-07-21). Loads only when the sheet
+// is empty. ⚠ in Description = a value to verify. Crew 18000 rows come from the
+// dedicated crew sheets (they supersede the grid's sparse Gildan Crew cells).
+const SEED = [
+  {section:"T-Shirts"},
+  {style:"Cotton Heavyweight Tee", color:"Black",      desc:"Heavyweight cotton tee", sizes:{S:40,L:17,XL:31,"2XL":8,"3XL":30}},
+  {style:"Cotton Heavyweight Tee", color:"White",      desc:"Heavyweight cotton tee", sizes:{S:18,M:14,L:2,"2XL":8,"3XL":14}},
+  {style:"Cotton Heavyweight Tee", color:"Tan",        desc:"Heavyweight cotton tee", sizes:{S:36,M:6,L:4,"2XL":16,"3XL":25}},
+  {style:"Cotton Heavyweight Tee", color:"Navy",       desc:"Heavyweight cotton tee", sizes:{S:34}},
+  {style:"Cotton Tee",             color:"White",      desc:"Standard cotton tee",    sizes:{S:121,M:72,L:9,XL:9,"2XL":6,"5XL":28}},
+  {style:"Poly/Cotton Tee",        color:"Black",      desc:"Poly/cotton blend tee",  sizes:{"4XL":24}},
+  {style:"Next Level Tee",         color:"Black",      desc:"Next Level cotton tee",  sizes:{S:75,M:11,L:2,XL:19,"2XL":19,"3XL":16}},
+  {style:"Next Level Tee",         color:"Grey",       desc:"Next Level cotton tee",  sizes:{S:19,M:7,L:4,XL:5,"4XL":3}},
+  {style:"Next Level Tee",         color:"Heather Grey", desc:"Next Level cotton tee (2nd grey shade)", sizes:{M:13,"3XL":1}},
+  {style:"Next Level 1810 Tee",    color:"Green",      desc:"Next Level 1810 cotton tee", sizes:{S:38,M:46,L:3,XL:44,"2XL":37,"3XL":36,"5XL":13}},
+  {style:"Next Level 1810 Tee",    color:"Red",        desc:"Next Level 1810 cotton tee", sizes:{S:46,M:50,L:20,XL:15,"2XL":14,"3XL":33,"4XL":21,"5XL":14}},
+  {style:"Lane 7 Tee",             color:"Tan",        desc:"Lane Seven tee",         sizes:{S:6,L:3,XL:2,"2XL":2}},
+  {style:"Lane 7 Tee",             color:"Navy",       desc:"Lane Seven tee",         sizes:{S:32}},
+  {style:"Ideal Tee",              color:"Tan",        desc:"Next Level Ideal tee",   sizes:{"2XL":5}},
+  {style:"Gildan Tee",             color:"Pink",       desc:"Gildan cotton tee",      sizes:{S:2,XL:1,"2XL":7}},
+  {style:"Comfort Colors 1717 Tee", color:"Light Blue", desc:"Comfort Colors garment-dyed tee", sizes:{S:14,M:12,L:4,XL:24,"2XL":8,"3XL":18}},
+  {style:"Comfort Colors 1717 Tee", color:"Ivory",     desc:"Comfort Colors garment-dyed tee", sizes:{S:25,M:19,XL:22,"2XL":24,"3XL":16,"4XL":11}},
+  {style:"Comfort Colors 1717 Tee", color:"Black",     desc:"Comfort Colors garment-dyed tee", sizes:{S:7,"2XL":24,"3XL":25,"4XL":45}},
+
+  {section:"Sweatshirts (Crewneck)"},
+  {style:"Gildan Crew 18000",      color:"Grey",       desc:"Gildan 18000 crewneck sweatshirt", sizes:{L:1}},
+  {style:"Gildan Crew 18000",      color:"Green",      desc:"Gildan 18000 crewneck sweatshirt", sizes:{S:1,L:3,XL:6,"2XL":7,"3XL":11}},
+  {style:"Gildan Crew 18000",      color:"Navy",       desc:"Gildan 18000 crewneck sweatshirt", sizes:{S:6,M:1,XL:2,"2XL":29,"3XL":20}},
+  {style:"Gildan Crew 18000",      color:"Tan",        desc:"Gildan 18000 crewneck sweatshirt", sizes:{S:15,M:19,XL:8,"2XL":11,"3XL":10}},
+  {style:"Gildan Crew 18000",      color:"Black",      desc:"Gildan 18000 crewneck sweatshirt", sizes:{S:10,M:10,L:2,"2XL":16,"3XL":15}},
+  {style:"District 6154 Crew",     color:"White",      desc:"District 6154 crewneck sweatshirt", sizes:{L:8,XL:8,"2XL":17,"3XL":7,"4XL":9,"5XL":2}},
+
+  {section:"Hoodies"},
+  {style:"Hoodie",                 color:"White",      desc:"Pullover hoodie",        sizes:{S:2,M:45,L:13,XL:12,"3XL":13,"4XL":18}},
+  {style:"DT6600 Hoodie",          color:"Black",      desc:"District DT6600 pullover hoodie", sizes:{S:7,M:12,L:11,XL:7,"2XL":12,"3XL":8,"4XL":15,"5XL":7}},
+  {style:"DT6600 Hoodie",          color:"Red",        desc:"District DT6600 pullover hoodie", sizes:{S:6,M:8,L:5,XL:1,"2XL":13,"3XL":34,"4XL":28}},
+  {style:"DT6600 Hoodie",          color:"Grey",       desc:"District DT6600 pullover hoodie", sizes:{S:16,M:16,L:2,"2XL":10,"3XL":6}},
+];
+
+function rowHTML(){
+  let h = '';
+  h += '<td class="text"><input data-f="style" placeholder="NL1810"></td>';
+  h += '<td class="text"><input data-f="color" placeholder="Black"></td>';
+  h += '<td class="text"><input data-f="desc" placeholder="Next Level Cotton Tee"></td>';
+  SIZES.forEach(s => h += `<td class="size"><input data-size="${s}" inputmode="numeric" placeholder="0"></td>`);
+  h += '<td class="total">0</td>';
+  h += '<td class="del"><button title="Delete row" onclick="delRow(this)">✕</button></td>';
+  return h;
+}
+
+function addRow(data){
+  const tr = document.createElement("tr");
+  if(data && data.section!==undefined){                 // section header band
+    tr.className = "section-row";
+    tr.dataset.section = data.section;
+    tr.innerHTML = `<td class="section" colspan="${SIZES.length+5}">${data.section}</td>`;
+    $("#body").appendChild(tr);
+    return tr;
+  }
+  tr.innerHTML = rowHTML();
+  $("#body").appendChild(tr);
+  if(data){
+    tr.querySelector('[data-f=style]').value = data.style||"";
+    tr.querySelector('[data-f=color]').value = data.color||"";
+    tr.querySelector('[data-f=desc]').value  = data.desc||"";
+    SIZES.forEach(s => tr.querySelector(`[data-size="${s}"]`).value = (data.sizes&&data.sizes[s])||"");
+  }
+  tr.querySelectorAll("input").forEach(inp=>{
+    inp.addEventListener("input", ()=>{ rowTotal(tr); footTotals(); save(); });
+    inp.addEventListener("keydown", e=>{
+      if(e.key==="Enter" && inp.dataset.size==="6XL"){ addRow(); $("#body").lastChild.querySelector("input").focus(); }
+    });
+  });
+  rowTotal(tr); footTotals();
+  return tr;
+}
+
+function delRow(btn){ btn.closest("tr").remove(); footTotals(); save(); }
+
+function rowTotal(tr){
+  let t=0; SIZES.forEach(s=>{ t += parseInt(tr.querySelector(`[data-size="${s}"]`).value)||0; });
+  tr.querySelector(".total").textContent = t;
+  return t;
+}
+
+function footTotals(){
+  const sums = Object.fromEntries(SIZES.map(s=>[s,0])); let grand=0;
+  $("#body").querySelectorAll("tr").forEach(tr=>{
+    if(tr.classList.contains("section-row")) return;
+    SIZES.forEach(s=>{ const v=parseInt(tr.querySelector(`[data-size="${s}"]`).value)||0; sums[s]+=v; grand+=v; });
+  });
+  let h = '<td class="text" colspan="3">TOTAL ON HAND</td>';
+  SIZES.forEach(s=> h += `<td>${sums[s]||""}</td>`);
+  h += `<td class="grand">${grand}</td><td></td>`;
+  $("#foot").innerHTML = h;
+}
+
+function collect(){
+  const rows=[];
+  $("#body").querySelectorAll("tr").forEach(tr=>{
+    if(tr.classList.contains("section-row")){ rows.push({section:tr.dataset.section}); return; }
+    const r = { style:tr.querySelector('[data-f=style]').value.trim(),
+                color:tr.querySelector('[data-f=color]').value.trim(),
+                desc:tr.querySelector('[data-f=desc]').value.trim(),
+                sizes:{} };
+    SIZES.forEach(s=> r.sizes[s]=tr.querySelector(`[data-size="${s}"]`).value.trim());
+    rows.push(r);
+  });
+  return rows;
+}
+
+function save(){
+  localStorage.setItem(KEY, JSON.stringify(collect()));
+  const t=new Date();
+  $("#status").textContent = "Autosaves to this browser. Last saved: "+t.toLocaleString();
+}
+
+function load(){
+  let data=null;
+  try{ data = JSON.parse(localStorage.getItem(KEY)); }catch(e){}
+  if(!Array.isArray(data)) data = SEED;              // first open -> load shelf counts
+  if(!data.length) data=[blankRow(),blankRow(),blankRow()];
+  data.forEach(addRow);
+}
+
+// ---- CSV (wide format, mirrors the bot's report) ----
+function csvCell(v){ v=String(v??""); return /[",\n]/.test(v) ? '"'+v.replace(/"/g,'""')+'"' : v; }
+
+function exportCSV(){
+  const head = ["sanmar_style","sanmar_color","description",...SIZES,"total"];
+  const lines=[head.join(",")];
+  collect().forEach(r=>{
+    if(r.section) return;                                 // section header, not data
+    if(!r.style && !r.color && !Object.values(r.sizes).some(Boolean)) return; // skip empty
+    let tot=0; const sz=SIZES.map(s=>{ const n=parseInt(r.sizes[s])||0; tot+=n; return n||""; });
+    lines.push([r.style,r.color,r.desc,...sz,tot].map(csvCell).join(","));
+  });
+  const blob=new Blob([lines.join("\n")],{type:"text/csv"});
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(blob); a.download="on_hand.csv"; a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+function importCSV(input){
+  const file=input.files[0]; if(!file) return;
+  const rd=new FileReader();
+  rd.onload=()=>{
+    const rows=parseCSV(rd.result); if(!rows.length){input.value="";return;}
+    const hdr=rows[0].map(h=>h.trim().toLowerCase());
+    const idx=n=>hdr.indexOf(n);
+    const iS=idx("sanmar_style"), iC=idx("sanmar_color"), iD=idx("description");
+    $("#body").innerHTML="";
+    rows.slice(1).forEach(cols=>{
+      if(!cols.length || cols.every(c=>!c.trim())) return;
+      const sizes={}; SIZES.forEach(s=>{ const j=hdr.indexOf(s.toLowerCase()); sizes[s]= j>-1?(cols[j]||"").trim():""; });
+      addRow({ style:iS>-1?cols[iS]:"", color:iC>-1?cols[iC]:"", desc:iD>-1?cols[iD]:"", sizes });
+    });
+    if(!$("#body").children.length) addRow();
+    footTotals(); save();
+  };
+  rd.readAsText(file); input.value="";
+}
+
+function parseCSV(text){
+  const rows=[]; let row=[],cur="",q=false;
+  for(let i=0;i<text.length;i++){ const c=text[i];
+    if(q){ if(c==='"'){ if(text[i+1]==='"'){cur+='"';i++;} else q=false; } else cur+=c; }
+    else { if(c==='"')q=true; else if(c===',')  {row.push(cur);cur="";}
+      else if(c==='\n'){row.push(cur);rows.push(row);row=[];cur="";}
+      else if(c!=='\r') cur+=c; }
+  }
+  if(cur.length||row.length){ row.push(cur); rows.push(row); }
+  return rows.filter(r=>r.length);
+}
+
+function clearAll(){
+  if(!confirm("Clear the whole sheet? This can't be undone.")) return;
+  $("#body").innerHTML=""; addRow(); addRow(); addRow(); footTotals(); save();
+}
+
+load(); footTotals();
+</script>
+</body>
+</html>

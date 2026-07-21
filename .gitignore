@@ -1,0 +1,7 @@
+# Real secrets — never commit. Share config.example.yaml instead.
+config.yaml
+# on_hand.csv IS shared over the bridge (it's the inventory export) — not ignored.
+reports/*.xlsx
+__pycache__/
+*.pyc
+.DS_Store
