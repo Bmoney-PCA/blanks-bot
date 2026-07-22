@@ -1,30 +1,10 @@
 printavo:
-  email: you@purechoiceapparel.com      # the email tied to your Printavo API token
-  token: PRINTAVO_API_TOKEN             # My Account > API
-  status_ids:                           # the status Printflo/Shopify pushes into.
-    - "0000"                            # run `--list-statuses` to find your real ID(s)
-  awaiting_garments_status_id: "0000"   # status to move orders to AFTER blanks ordered
-  order_blanks_task_name: "Order Blanks"  # task name to auto-check on PO submit
+  email: you@purechoiceapparel.com      # email tied to your Printavo API token
+  token: PRINTAVO_API_TOKEN             # My Account > API  (paste yours here; this file is gitignored)
+  needs_blanks_status_ids:              # status(es) that hold orders needing blanks
+    - "0000"                            # run --list-statuses to find real ids
+  received_status_ids:                  # status(es) that mean "Received Garments"
+    - "0000"                            # the SUBTRACT trigger
 
 sku_map_path: sku_map.csv
-on_hand_path: on_hand.csv               # exported from on_hand_inventory.html (net against demand)
-output_dir: ./reports
-
-email:
-  enabled: true
-  smtp_host: smtp.gmail.com
-  smtp_port: 587
-  smtp_user: alerts@yourdomain.com
-  smtp_pass: APP_PASSWORD               # use an app password, not your login
-  from: alerts@yourdomain.com
-  to:
-    - you@purechoiceapparel.com
-
-sanmar:
-  po_enabled: false                     # flip to true ONLY after SanMar PO onboarding
-  username: SANMAR_WEB_USER             # your sanmar.com username (not Printavo)
-  password: SANMAR_WEB_PASS
-  customer_number: "0000000"
-  po_wsdl: "https://ws.sanmar.com:8080/promostandards/POServiceBinding?WSDL"
-  ship_to_name: "Pure Choice Apparel"
-  ship_to_address: "123 Shop St, Phoenix, AZ 85001"
+output_dir: .                           # where on_hand.csv / ledger.csv / tracker.html live

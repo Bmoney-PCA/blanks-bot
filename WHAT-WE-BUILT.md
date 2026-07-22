@@ -1,34 +1,54 @@
-# What we built — Pure Choice Apparel blanks system
+# What we built — Pure Choice Apparel blank inventory side
 
-_For the bridge collaboration. This is the PCA side's starting point — the goal is to
-design the shared system **around this**, not replace it. Nothing gets locked in without
-Brandon + the other dev signing off._
+_For the bridge collaboration. This is the PCA (Sampson) side. The goal: keep an
+accurate on-hand blank count and hand it to Shane's ordering bot. **This bot does
+not order** — Shane's does. Nothing gets locked in without Sampson + Shane signing off._
 
-## 1. On-hand inventory sheet (the thing the floor uses)
-- **File:** `on_hand_inventory.html` — a single-file, offline, browser-based count sheet. Autosaves to the browser; **Export CSV** drops `on_hand.csv`.
-- **Grouped by garment type** into three sections: **T-Shirts**, **Sweatshirts (Crewneck)**, **Hoodies**.
-- **Columns:** Style, Color, Description, then sizes `XS S M L XL 2XL 3XL 4XL 5XL 6XL`, plus per-row Total. Footer shows per-size totals + grand total.
-- **Current snapshot:** 28 items, **2,135 units** on hand.
+## The bot's job (inventory keeper)
+`blanks_bot.py` keeps the count; it never buys. It tracks **three numbers** per
+(style, color, size):
 
-## 2. The export the bot consumes
-- **File:** `on_hand.csv` — same data, wide format.
-- **Header:** `sanmar_style,sanmar_color,description,XS,S,M,L,XL,2XL,3XL,4XL,5XL,6XL,total`
-- Intended use: net on-hand against Printavo demand **before** ordering blanks from SanMar (bot TODO [E]).
+| | meaning |
+|---|---|
+| **On Hand** | physically on the shelf |
+| **Allocated** | reserved to a job (committed, not yet pulled) |
+| **Available** | On Hand − Allocated → what's free (the number to net orders against) |
 
-## 3. The ordering bot
-- **File:** `blanks_bot.py` (single file; full design + API notes in its header).
-- Pulls Printavo orders in a "needs blanks" status → aggregates demand by (style,color,size) → maps to SanMar via `sku_map.csv` → builds an XLSX → emails on a 3 PM cron. On triple-gated approval, submits the SanMar PO and writes back to Printavo.
-- Open items: `TODO(next-builder)` [A] live SanMar sendPO, [B] stock check, [C] confirm Printavo size shape, [D] real sku_map, [E] net on_hand.csv.
+**Events** (all from Printavo's API, each idempotent + logged in `ledger.csv`):
+- **allocate** (+Allocated) — "Order Blanks" checked. Available drops, On Hand doesn't, so Shane only orders the shortfall and no two jobs claim the same blank.
+- **pull** (−On Hand, −Allocated) — "Received Garments". Confirms the reserved blank physically left.
+- **restock** (+On Hand) — a SanMar order arrives into stock.
 
-## 4. Items flagged for a human to confirm
-Style/Color are transcribed from handwritten shelf counts; brand→SanMar style-number mapping is still open (bot TODO [D]). Specific reads to verify:
-- **Pink Gildan Tee, 2XL = 7** (digit could be a 2).
-- **Black Poly/Cotton Tee, 4XL = 24** (label was abbreviated "Poly/Co").
-- **"Heather Grey" Next Level** (M:13, 3XL:1) — the grid row's color label was cut off; best guess.
-- **Gildan Crew 18000 (Navy & Tan)** — dedicated crew sheets were used over the grid's sparser cells; numbers differ.
-- **DT6600 Red Hoodie 4XL = 28** and **CC1717 Black 4XL = 45** — both were crossed-out corrections.
+It regenerates **`tracker.html`** (On Hand / Allocated / Available, grouped by
+garment, with a freshness stamp) and exports **`on_hand.csv`** — the file Shane's
+side reads.
 
-## 5. How tracking actually works on the floor
-> **TODO (Brandon to fill):** how the shelves get counted — how often, by whom, in what
-> order, and how a count gets from paper into the sheet. This is the part the shared
-> system should be designed around.
+## Current snapshot — 2,135 units, SanMar-exact style codes
+Style codes are verified against sanmar.com so they map cleanly on the ordering side:
+
+| Code | Garment |
+|---|---|
+| **NL1810** | Next Level cotton tee **(S–3XL only)** |
+| **5000** | Gildan Heavy Cotton tee |
+| **1717** | Comfort Colors garment-dyed tee |
+| **18000** | Gildan Heavy Blend crew |
+| **DT6600** | District V.I.T. Super Heavyweight Fleece Hoodie |
+| **DT6104** | District V.I.T. Fleece Crew |
+| **PC54** | Port & Company Core Cotton Tee (the 4XL/5XL extended tees) |
+| **Lane 7** | non-SanMar supplier tee — **Shane does NOT order this** (blank # TBD) |
+
+**Two rules baked into the data:**
+1. **NL1810 tops out at 3XL** — any 4XL/5XL of those tees are **PC54**, not NL1810.
+2. **Lane 7 is not SanMar** — flagged; it stays in inventory but the ordering bot skips it.
+
+Sizes tracked: **S → 6XL** (no XS).
+
+## What the ordering side needs from us
+Per (style, color, size): current **Available** + a **freshness timestamp** by ~2:15 PM.
+Both come straight out of `on_hand.csv` / the tracker.
+
+## Open (Sampson to provide)
+- Lane 7 blank style #.
+- **How tracking works on the floor** — who counts, how often, in what order, and
+  how a count reaches the sheet. This is the piece to design the shared system around.
+- Printavo API token wired in (local `config.yaml`) to turn on the live receive/pull.

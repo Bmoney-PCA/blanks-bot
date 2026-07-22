@@ -1,29 +1,33 @@
-sanmar_style,sanmar_color,description,XS,S,M,L,XL,2XL,3XL,4XL,5XL,6XL,total
-Cotton Heavyweight Tee,Black,Heavyweight cotton tee,,40,,17,31,8,30,,,,126
-Cotton Heavyweight Tee,White,Heavyweight cotton tee,,18,14,2,,8,14,,,,56
-Cotton Heavyweight Tee,Tan,Heavyweight cotton tee,,36,6,4,,16,25,,,,87
-Cotton Heavyweight Tee,Navy,Heavyweight cotton tee,,34,,,,,,,,,34
-Cotton Tee,White,Standard cotton tee,,121,72,9,9,6,,,28,,245
-Poly/Cotton Tee,Black,Poly/cotton blend tee,,,,,,,,24,,,24
-Next Level Tee,Black,Next Level cotton tee,,75,11,2,19,19,16,,,,142
-Next Level Tee,Grey,Next Level cotton tee,,19,7,4,5,,,3,,,38
-Next Level Tee,Heather Grey,Next Level cotton tee (2nd grey shade),,,13,,,,1,,,,14
-Next Level 1810 Tee,Green,Next Level 1810 cotton tee,,38,46,3,44,37,36,,13,,217
-Next Level 1810 Tee,Red,Next Level 1810 cotton tee,,46,50,20,15,14,33,21,14,,213
-Lane 7 Tee,Tan,Lane Seven tee,,6,,3,2,2,,,,,13
-Lane 7 Tee,Navy,Lane Seven tee,,32,,,,,,,,,32
-Ideal Tee,Tan,Next Level Ideal tee,,,,,,5,,,,,5
-Gildan Tee,Pink,Gildan cotton tee,,2,,,1,7,,,,,10
-Comfort Colors 1717 Tee,Light Blue,Comfort Colors garment-dyed tee,,14,12,4,24,8,18,,,,80
-Comfort Colors 1717 Tee,Ivory,Comfort Colors garment-dyed tee,,25,19,,22,24,16,11,,,117
-Comfort Colors 1717 Tee,Black,Comfort Colors garment-dyed tee,,7,,,,24,25,45,,,101
-Gildan Crew 18000,Grey,Gildan 18000 crewneck sweatshirt,,,,1,,,,,,,1
-Gildan Crew 18000,Green,Gildan 18000 crewneck sweatshirt,,1,,3,6,7,11,,,,28
-Gildan Crew 18000,Navy,Gildan 18000 crewneck sweatshirt,,6,1,,2,29,20,,,,58
-Gildan Crew 18000,Tan,Gildan 18000 crewneck sweatshirt,,15,19,,8,11,10,,,,63
-Gildan Crew 18000,Black,Gildan 18000 crewneck sweatshirt,,10,10,2,,16,15,,,,53
-District 6154 Crew,White,District 6154 crewneck sweatshirt,,,,8,8,17,7,9,2,,51
-Hoodie,White,Pullover hoodie,,2,45,13,12,,13,18,,,103
-DT6600 Hoodie,Black,District DT6600 pullover hoodie,,7,12,11,7,12,8,15,7,,79
-DT6600 Hoodie,Red,District DT6600 pullover hoodie,,6,8,5,1,13,34,28,,,95
-DT6600 Hoodie,Grey,District DT6600 pullover hoodie,,16,16,2,,10,6,,,,50
+sanmar_style,sanmar_color,description,S,M,L,XL,2XL,3XL,4XL,5XL,6XL,total
+1717,Black,Comfort Colors garment-dyed heavyweight tee,7,,,,24,25,45,,,101
+1717,Ivory,Comfort Colors garment-dyed heavyweight tee,25,19,,22,24,16,11,,,117
+1717,Light Blue,Comfort Colors garment-dyed heavyweight tee,14,12,4,24,8,18,,,,80
+18000,Black,Gildan Heavy Blend crewneck sweatshirt,10,10,2,,16,15,,,,53
+18000,Green,Gildan Heavy Blend crewneck sweatshirt,1,,3,6,7,11,,,,28
+18000,Grey,Gildan Heavy Blend crewneck sweatshirt,,,1,,,,,,,1
+18000,Navy,Gildan Heavy Blend crewneck sweatshirt,6,1,,2,29,20,,,,58
+18000,Tan,Gildan Heavy Blend crewneck sweatshirt,15,19,,8,11,10,,,,63
+5000,Black,Gildan Heavy Cotton 100% cotton tee,40,,17,31,8,30,,,,126
+5000,Navy,Gildan Heavy Cotton 100% cotton tee,34,,,,,,,,,34
+5000,Pink,Gildan Heavy Cotton 100% cotton tee,2,,,1,7,,,,,10
+5000,Tan,Gildan Heavy Cotton 100% cotton tee,36,6,4,,16,25,,,,87
+5000,White,Gildan Heavy Cotton 100% cotton tee,18,14,2,,8,14,,,,56
+DT6104,White,District V.I.T. Fleece Crew,,,8,8,17,7,9,2,,51
+DT6600,Black,District V.I.T. Super Heavyweight Fleece Hoodie,7,12,11,7,12,8,15,7,,79
+DT6600,Grey,District V.I.T. Super Heavyweight Fleece Hoodie,16,16,2,,10,6,,,,50
+DT6600,Red,District V.I.T. Super Heavyweight Fleece Hoodie,6,8,5,1,13,34,28,,,95
+DT6600,White,District V.I.T. Super Heavyweight Fleece Hoodie,2,45,13,12,,13,18,,,103
+Lane 7,Navy,"Lane Seven tee — NON-SanMar supplier, not Shane's to order (style # TBD)",32,,,,,,,,,32
+Lane 7,Tan,"Lane Seven tee — NON-SanMar supplier, not Shane's to order (style # TBD)",6,,3,2,2,,,,,13
+NL1810,Black,Next Level 1810 cotton tee (S-3XL),75,11,2,19,19,16,,,,142
+NL1810,Green,Next Level 1810 cotton tee (S-3XL),38,46,3,44,37,36,,,,204
+NL1810,Grey,Next Level 1810 cotton tee (S-3XL),19,7,4,5,,,,,,35
+NL1810,Heather Grey,Next Level 1810 cotton tee (S-3XL),,13,,,,1,,,,14
+NL1810,Red,Next Level 1810 cotton tee (S-3XL),46,50,20,15,14,33,,,,178
+NL1810,Tan,Next Level 1810 cotton tee (S-3XL),,,,,5,,,,,5
+NL1810,White,Next Level 1810 cotton tee (S-3XL),121,72,9,9,6,,,,,217
+PC54,Black,Port & Company Core Cotton Tee (4XL/5XL),,,,,,,24,,,24
+PC54,Green,Port & Company Core Cotton Tee (4XL/5XL),,,,,,,,13,,13
+PC54,Grey,Port & Company Core Cotton Tee (4XL/5XL),,,,,,,3,,,3
+PC54,Red,Port & Company Core Cotton Tee (4XL/5XL),,,,,,,21,14,,35
+PC54,White,Port & Company Core Cotton Tee (4XL/5XL),,,,,,,,28,,28
